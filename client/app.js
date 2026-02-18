@@ -1,5 +1,8 @@
-const API_BASE = 'https://unpopulously-ungrimed-pilar.ngrok-free.app';
-const NGROK_HEADER = 'true';
+
+
+// use the instructor's ngrok URL (ensure this matches the URL they provided)
+var API_BASE = 'https://unpopulously-ungrimed-pilar.ngrok-free.dev';
+var NGROK_HEADER = {'ngrok-skip-browser-warning': '1'};
 
 let playerId = null;
 let playerName = null;
@@ -9,17 +12,12 @@ let currentRoundId = null;
 function joinGame(name) {
   fetch(API_BASE + '/api/join', {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': NGROK_HEADER
-    },
+    headers: Object.assign({ 'Content-Type': 'application/json' }, NGROK_HEADER ),
     body: JSON.stringify({ name: name })
   })
     .then(function(response) {
       return response.json().then(function(data) {
-        if (!response.ok) {
-          showJoinError(data.error || 'Join failed');
-        } else {
+        if (data.player_id) {
           playerId = data.player_id;
           playerName = data.name;
           onJoined();
@@ -27,9 +25,7 @@ function joinGame(name) {
         }
       });
     })
-    .catch(function(err) {
-      showJoinError('Network error: ' + err.message);
-    });
+    .catch(function () {});
 }
 
 function onJoined() {
@@ -47,7 +43,7 @@ function showJoinError(message) {
 
 function pollState() {
   fetch(API_BASE + '/api/state', {
-    headers: { 'ngrok-skip-browser-warning': NGROK_HEADER }
+    headers: Object.assign({}, NGROK_HEADER)
   })
     .then(function(response) { return response.json(); })
     .then(function(data) {
@@ -76,10 +72,7 @@ function submitAnswer() {
 
   fetch(API_BASE + '/api/answer', {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': NGROK_HEADER
-    },
+    headers: Object.assign({ 'Content-Type': 'application/json' }, NGROK_HEADER),
     body: JSON.stringify({ player_id: playerId, round_id: currentRoundId, answer: answer })
   })
     .then(function(response) {
@@ -107,10 +100,7 @@ function submitGuess() {
 
   fetch(API_BASE + '/api/guess', {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': NGROK_HEADER
-    },
+    headers: Object.assign({ 'Content-Type': 'application/json' }, NGROK_HEADER),
     body: JSON.stringify({ player_id: playerId, round_id: currentRoundId, guess: guess })
   })
     .then(function(response) {
@@ -134,7 +124,7 @@ function submitGuess() {
 
 function fetchResults() {
   fetch(API_BASE + '/api/results?round_id=' + currentRoundId, {
-    headers: { 'ngrok-skip-browser-warning': NGROK_HEADER }
+    headers: Object.assign({}, NGROK_HEADER)
   })
     .then(function(response) {
       return response.json().then(function(data) {
